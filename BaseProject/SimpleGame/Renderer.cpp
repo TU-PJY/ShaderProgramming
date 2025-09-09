@@ -18,7 +18,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_WindowSizeY = windowSizeY;
 
 	//Load shaders
-	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
+	m_SolidRectShader = CompileShaders("./Shaders/Vertex_SolidRect.glsl", "./Shaders/Fragment_SolidRect.glsl");
 	
 	//Create VBOs
 	CreateVertexBufferObjects();
