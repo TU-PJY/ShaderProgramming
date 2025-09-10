@@ -59,6 +59,17 @@ void Renderer::CreateVertexBufferObjects()
 	glGenBuffers(1, &m_VBOTestPos);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestPos);
 	glBufferData(GL_ARRAY_BUFFER, testPos.size() * sizeof(float), testPos.data(), GL_STATIC_DRAW);
+
+	std::vector<float> testColor =
+	{
+		1.f, 0.f, 0.f, 1.f,
+		0.f, 1.f, 0.f, 1.f,
+		0.f, 0.f, 1.f, 1.f,
+	}; //Triangle1
+
+	glGenBuffers(1, &m_VBOColor);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOColor);
+	glBufferData(GL_ARRAY_BUFFER, testColor.size() * sizeof(float), testColor.data(), GL_STATIC_DRAW);
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -196,9 +207,7 @@ void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, flo
 	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-
 	glDisableVertexAttribArray(attribPosition);
-
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -207,17 +216,21 @@ void Renderer::DrawTest()
 	glUseProgram(m_SolidRectShader);
 
 	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Trans"), 0, 0, 0, 1);
-	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Color"), 0, 1, 1, 1);
+	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Color"), 0.5, 0.5, 0.5, 1);
 
-	int attribPosition = glGetAttribLocation(m_SolidRectShader, "a_Position");
-	glEnableVertexAttribArray(attribPosition);
+	int aPosLoc = glGetAttribLocation(m_SolidRectShader, "a_Position");
+	glEnableVertexAttribArray(aPosLoc);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestPos);
-	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	glVertexAttribPointer(aPosLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+
+	int aColorLoc = glGetAttribLocation(m_SolidRectShader, "a_Color");
+	glEnableVertexAttribArray(aColorLoc);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOColor);
+	glVertexAttribPointer(aColorLoc, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
 
 	glDrawArrays(GL_TRIANGLES, 0, 3);
-
-	glDisableVertexAttribArray(attribPosition);
-
+	glDisableVertexAttribArray(aPosLoc);
+	glDisableVertexAttribArray(aColorLoc);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
