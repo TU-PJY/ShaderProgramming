@@ -19,11 +19,11 @@
     <Filter Include="소스 파일\Shaders\Particle">
       <UniqueIdentifier>{4dff9681-be0f-4e76-b466-174008a3035b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Shaders\SolidRect">
-      <UniqueIdentifier>{dbe64751-46f2-4abe-a1b0-36964bc69dcc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\Shaders\Test">
       <UniqueIdentifier>{991138f3-4ba0-44dc-b9dd-f145a15d2956}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Shaders\SolidRect">
+      <UniqueIdentifier>{dbe64751-46f2-4abe-a1b0-36964bc69dcc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
