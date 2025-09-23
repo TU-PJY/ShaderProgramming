@@ -142,9 +142,9 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ConformanceMode>false</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -174,8 +174,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Fragment_SolidRect.glsl" />
-    <None Include="Shaders\Vertex_SolidRect.glsl" />
+    <None Include="Shaders\Particle.fs" />
+    <None Include="Shaders\Particle.vs" />
+    <None Include="Shaders\SolidRect.fs" />
+    <None Include="Shaders\SolidRect.vs" />
+    <None Include="Shaders\Test.fs" />
+    <None Include="Shaders\Test.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
