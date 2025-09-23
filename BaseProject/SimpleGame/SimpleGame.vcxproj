@@ -174,12 +174,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Particle.fs" />
-    <None Include="Shaders\Particle.vs" />
-    <None Include="Shaders\SolidRect.fs" />
-    <None Include="Shaders\SolidRect.vs" />
-    <None Include="Shaders\Test.fs" />
-    <None Include="Shaders\Test.vs" />
+    <None Include="Shaders\Fragment_Particle.glsl" />
+    <None Include="Shaders\Vertex_Particle.glsl" />
+    <None Include="Shaders\Fragment_SolidRect.glsl" />
+    <None Include="Shaders\Vertex_SolidRect.glsl" />
+    <None Include="Shaders\Fragment_Test.glsl" />
+    <None Include="Shaders\Vertex_Test.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
