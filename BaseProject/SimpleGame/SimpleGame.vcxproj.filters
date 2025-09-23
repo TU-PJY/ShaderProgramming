@@ -16,6 +16,12 @@
     <Filter Include="소스 파일\Shaders">
       <UniqueIdentifier>{aa86e47f-445f-4440-9a76-173363b46c4e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Shaders\Fragment">
+      <UniqueIdentifier>{991138f3-4ba0-44dc-b9dd-f145a15d2956}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Shaders\Vertex">
+      <UniqueIdentifier>{dbe64751-46f2-4abe-a1b0-36964bc69dcc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -43,23 +49,23 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Fragment_SolidRect.glsl">
-      <Filter>소스 파일\Shaders</Filter>
-    </None>
-    <None Include="Shaders\Vertex_SolidRect.glsl">
-      <Filter>소스 파일\Shaders</Filter>
-    </None>
     <None Include="Shaders\Fragment_Test.glsl">
-      <Filter>소스 파일\Shaders</Filter>
+      <Filter>소스 파일\Shaders\Fragment</Filter>
     </None>
-    <None Include="Shaders\Vertex_Test.glsl">
-      <Filter>소스 파일\Shaders</Filter>
+    <None Include="Shaders\Fragment_SolidRect.glsl">
+      <Filter>소스 파일\Shaders\Fragment</Filter>
     </None>
     <None Include="Shaders\Fragment_Particle.glsl">
-      <Filter>소스 파일\Shaders</Filter>
+      <Filter>소스 파일\Shaders\Fragment</Filter>
     </None>
     <None Include="Shaders\Vertex_Particle.glsl">
-      <Filter>소스 파일\Shaders</Filter>
+      <Filter>소스 파일\Shaders\Vertex</Filter>
+    </None>
+    <None Include="Shaders\Vertex_SolidRect.glsl">
+      <Filter>소스 파일\Shaders\Vertex</Filter>
+    </None>
+    <None Include="Shaders\Vertex_Test.glsl">
+      <Filter>소스 파일\Shaders\Vertex</Filter>
     </None>
   </ItemGroup>
 </Project>
