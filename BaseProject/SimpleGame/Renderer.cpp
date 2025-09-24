@@ -1,6 +1,7 @@
-ï»¿#include "stdafx.h"
+#include "stdafx.h"
 #include "Renderer.h"
 #include <vector>
+#include <random>
 
 Renderer::Renderer(int windowSizeX, int windowSizeY)
 {
@@ -110,7 +111,7 @@ void Renderer::CreateVertexBufferObjects()
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
 {
-	//ì‰ì´ë” ì˜¤ë¸Œì íŠ¸ ìƒì„±
+	//½¦ÀÌ´õ ¿ÀºêÁ§Æ® »ı¼º
 	GLuint ShaderObj = glCreateShader(ShaderType);
 
 	if (ShaderObj == 0) {
@@ -128,25 +129,25 @@ void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum S
 	GLint len = (GLint)slen;
 
 	Lengths[0] = len;
-	//ì‰ì´ë” ì½”ë“œë¥¼ ì‰ì´ë” ì˜¤ë¸Œì íŠ¸ì— í• ë‹¹
+	//½¦ÀÌ´õ ÄÚµå¸¦ ½¦ÀÌ´õ ¿ÀºêÁ§Æ®¿¡ ÇÒ´ç
 	glShaderSource(ShaderObj, 1, p, Lengths);
 
-	//í• ë‹¹ëœ ì‰ì´ë” ì½”ë“œë¥¼ ì»´íŒŒì¼
+	//ÇÒ´çµÈ ½¦ÀÌ´õ ÄÚµå¸¦ ÄÄÆÄÀÏ
 	glCompileShader(ShaderObj);
 
 	GLint success;
-	// ShaderObj ê°€ ì„±ê³µì ìœ¼ë¡œ ì»´íŒŒì¼ ë˜ì—ˆëŠ”ì§€ í™•ì¸
+	// ShaderObj °¡ ¼º°øÀûÀ¸·Î ÄÄÆÄÀÏ µÇ¾ú´ÂÁö È®ÀÎ
 	glGetShaderiv(ShaderObj, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		GLchar InfoLog[1024];
 
-		//OpenGL ì˜ shader log ë°ì´í„°ë¥¼ ê°€ì ¸ì˜´
+		//OpenGL ÀÇ shader log µ¥ÀÌÅÍ¸¦ °¡Á®¿È
 		glGetShaderInfoLog(ShaderObj, 1024, NULL, InfoLog);
 		fprintf(stderr, "Error compiling shader type %d: '%s'\n", ShaderType, InfoLog);
 		printf("%s \n", pShaderText);
 	}
 
-	// ShaderProgram ì— attach!!
+	// ShaderProgram ¿¡ attach!!
 	glAttachShader(ShaderProgram, ShaderObj);
 }
 
@@ -169,43 +170,43 @@ bool Renderer::ReadFile(char* filename, std::string *target)
 
 GLuint Renderer::CompileShaders(char* filenameVS, char* filenameFS)
 {
-	GLuint ShaderProgram = glCreateProgram(); //ë¹ˆ ì‰ì´ë” í”„ë¡œê·¸ë¨ ìƒì„±
+	GLuint ShaderProgram = glCreateProgram(); //ºó ½¦ÀÌ´õ ÇÁ·Î±×·¥ »ı¼º
 
-	if (ShaderProgram == 0) { //ì‰ì´ë” í”„ë¡œê·¸ë¨ì´ ë§Œë“¤ì–´ì¡ŒëŠ”ì§€ í™•ì¸
+	if (ShaderProgram == 0) { //½¦ÀÌ´õ ÇÁ·Î±×·¥ÀÌ ¸¸µé¾îÁ³´ÂÁö È®ÀÎ
 		fprintf(stderr, "Error creating shader program\n");
 	}
 
 	std::string vs, fs;
 
-	//shader.vs ê°€ vs ì•ˆìœ¼ë¡œ ë¡œë”©ë¨
+	//shader.vs °¡ vs ¾ÈÀ¸·Î ·ÎµùµÊ
 	if (!ReadFile(filenameVS, &vs)) {
 		printf("Error compiling vertex shader\n");
 		return -1;
 	};
 
-	//shader.fs ê°€ fs ì•ˆìœ¼ë¡œ ë¡œë”©ë¨
+	//shader.fs °¡ fs ¾ÈÀ¸·Î ·ÎµùµÊ
 	if (!ReadFile(filenameFS, &fs)) {
 		printf("Error compiling fragment shader\n");
 		return -1;
 	};
 
-	// ShaderProgram ì— vs.c_str() ë²„í…ìŠ¤ ì‰ì´ë”ë¥¼ ì»´íŒŒì¼í•œ ê²°ê³¼ë¥¼ attachí•¨
+	// ShaderProgram ¿¡ vs.c_str() ¹öÅØ½º ½¦ÀÌ´õ¸¦ ÄÄÆÄÀÏÇÑ °á°ú¸¦ attachÇÔ
 	AddShader(ShaderProgram, vs.c_str(), GL_VERTEX_SHADER);
 
-	// ShaderProgram ì— fs.c_str() í”„ë ˆê·¸ë¨¼íŠ¸ ì‰ì´ë”ë¥¼ ì»´íŒŒì¼í•œ ê²°ê³¼ë¥¼ attachí•¨
+	// ShaderProgram ¿¡ fs.c_str() ÇÁ·¹±×¸ÕÆ® ½¦ÀÌ´õ¸¦ ÄÄÆÄÀÏÇÑ °á°ú¸¦ attachÇÔ
 	AddShader(ShaderProgram, fs.c_str(), GL_FRAGMENT_SHADER);
 
 	GLint Success = 0;
 	GLchar ErrorLog[1024] = { 0 };
 
-	//Attach ì™„ë£Œëœ shaderProgram ì„ ë§í‚¹í•¨
+	//Attach ¿Ï·áµÈ shaderProgram À» ¸µÅ·ÇÔ
 	glLinkProgram(ShaderProgram);
 
-	//ë§í¬ê°€ ì„±ê³µí–ˆëŠ”ì§€ í™•ì¸
+	//¸µÅ©°¡ ¼º°øÇß´ÂÁö È®ÀÎ
 	glGetProgramiv(ShaderProgram, GL_LINK_STATUS, &Success);
 
 	if (Success == 0) {
-		// shader program ë¡œê·¸ë¥¼ ë°›ì•„ì˜´
+		// shader program ·Î±×¸¦ ¹Ş¾Æ¿È
 		glGetProgramInfoLog(ShaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
 		std::cout << filenameVS << ", " << filenameFS << " Error linking shader program\n" << ErrorLog;
 		return -1;
@@ -283,7 +284,10 @@ void Renderer::DrawTest()
 
 void Renderer::DrawParticle()
 {
-	m_Time += 0.001f;
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	m_Time += 0.0001f;
 
 	//Program select
 	GLuint shader = m_ParticleShader;
@@ -292,7 +296,7 @@ void Renderer::DrawParticle()
 	int uTimeLoc = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTimeLoc, m_Time);
 
-	int stride = 12;
+	int stride = 14;
 
 	int aPosLoc = glGetAttribLocation(shader, "a_Position");
 	glEnableVertexAttribArray(aPosLoc);
@@ -315,12 +319,25 @@ void Renderer::DrawParticle()
 	glEnableVertexAttribArray(aVelLoc);
 	glVertexAttribPointer(aVelLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 9));
 
+	int aLifeTimeLoc = glGetAttribLocation(shader, "a_lifeTime");
+	glEnableVertexAttribArray(aLifeTimeLoc);
+	glVertexAttribPointer(aLifeTimeLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 12));
+
+	int aMassLoc = glGetAttribLocation(shader, "a_Mass");
+	glEnableVertexAttribArray(aMassLoc);
+	glVertexAttribPointer(aMassLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 13));
+
+	int uForceLoc = glGetAttribLocation(shader, "u_Force");
+	glUniform3f(uForceLoc, 2.f, 0.f, 0.f);
+
 	glDrawArrays(GL_TRIANGLES, 0, m_VBOParticleVertexCount);
 
 	//glDisableVertexAttribArray(aPosLoc);
 	//glDisableVertexAttribArray(aColorLoc);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glDisable(GL_BLEND);
 }
 
 void Renderer::ReloadAllShaderPrograms() {
@@ -338,16 +355,15 @@ void Renderer::CreateParticles(int count)
 {
 	int particleCounts = count;
 	int verticesCount = particleCounts * 6;
-	int floatCountsPerVertex = 3 + 1 + 4 + 1 + 3; 
-	// x, y, z, value, r, g, b, a, sTime, vx,  vy, vz
+	int floatCountsPerVertex = 3 + 1 + 4 + 1 + 3 + 1 + 1; 
+	// x, y, z, value, r, g, b, a, sTime, vx,  vy, vz, lifeTime, mass
 	int totalFloatCounts = floatCountsPerVertex * verticesCount;
 	int floatCountsPerParticle = floatCountsPerVertex * 6;
 	
 	std::vector<float> temp{};
 	temp.resize(totalFloatCounts);
 
-	for (int i = 0; i < particleCounts; i++)
-	{
+	for (int i = 0; i < particleCounts; i++) {
 		float size = 0.02 * (float)rand() / (float)RAND_MAX;
 		float centerX = 0.f;// (float)rand() / (float)RAND_MAX * 2.f - 1.f;
 		float centerY = 0.f;// (float)rand() / (float)RAND_MAX * 2.f - 1.f;
@@ -355,11 +371,13 @@ void Renderer::CreateParticles(int count)
 		float r = (float)rand() / (float)RAND_MAX;
 		float g = (float)rand() / (float)RAND_MAX;
 		float b = (float)rand() / (float)RAND_MAX;
-		float a = (float)rand() / (float)RAND_MAX;
+		float a = 1.f;
 		float sTime = (float)rand() / (float)RAND_MAX * 2.f;
-		float vx = (float)rand() / (float)RAND_MAX * 2.f - 1.f;
-		float vy = (float)rand() / (float)RAND_MAX * 2.f - 1.f;
+		float vx = ((float)rand() / (float)RAND_MAX * 2.f - 1.f) * 3.f;
+		float vy = (float)rand() / (float)RAND_MAX * 10.f;
 		float vz = 0.f;
+		float lifeTime = (float)rand() / (float)RAND_MAX * 1.5f;
+		float mass = (float)rand() / (float)RAND_MAX * 1.f + 1.f;
 
 		int index = i * floatCountsPerParticle;
 
@@ -399,6 +417,8 @@ void Renderer::CreateParticles(int count)
 			temp[index++] = vx; // vel x
 			temp[index++] = vy; // vel y
 			temp[index++] = vz; // vel z
+			temp[index++] = lifeTime; // lifeTime
+			temp[index++] = mass;
 		}
 	}
 	glGenBuffers(1, &m_VBOParticles);
