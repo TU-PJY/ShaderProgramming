@@ -26,7 +26,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	CreateVertexBufferObjects();
 
 	//Create Particles
-	CreateParticles(10000);
+	CreateParticles(5000);
 
 	if (m_SolidRectShader > 0 && m_VBORect > 0)
 	{
@@ -252,7 +252,7 @@ void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, flo
 
 void Renderer::DrawTest()
 {
-	m_Time += 0.00016;
+	m_Time += 0.000001;
 
 	//Program select
 	glUseProgram(m_TestShader);
@@ -287,20 +287,39 @@ void Renderer::DrawParticle()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	m_Time += 0.0001f;
+	m_Time += 0.01;
+
 
 	//Program select
+	int stride = 15;
 	GLuint shader = m_ParticleShader;
 	glUseProgram(m_ParticleShader);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticles);
 
 	int uTimeLoc = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTimeLoc, m_Time);
 
-	int stride = 14;
+	int uForceLoc = glGetAttribLocation(shader, "u_Force");
+	glUniform3f(uForceLoc, 2.f, 0.f, 0.f);
+
+	auto sendAttr = [&](const std::string& name, int numData, int numIndex)
+	{
+		auto location = glGetUniformLocation(shader, name.c_str());
+		glEnableVertexAttribArray(location);
+		glVertexAttribPointer(location, numData, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * numIndex));
+	};
+
+	/*sendAttr("a_Position", 3, 0);
+	sendAttr("a_Value", 1, 3);
+	sendAttr("a_Color", 4, 4);
+	sendAttr("a_sTime", 1, 8);
+	sendAttr("a_Vel", 3, 9);
+	sendAttr("a_lifeTime", 1, 12);
+	sendAttr("a_Mass", 1, 13);
+	sendAttr("a_Period", 1, 14);*/
 
 	int aPosLoc = glGetAttribLocation(shader, "a_Position");
 	glEnableVertexAttribArray(aPosLoc);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticles);
 	glVertexAttribPointer(aPosLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * stride, 0);
 
 	int aValueLoc = glGetAttribLocation(shader, "a_Value");
@@ -327,8 +346,9 @@ void Renderer::DrawParticle()
 	glEnableVertexAttribArray(aMassLoc);
 	glVertexAttribPointer(aMassLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 13));
 
-	int uForceLoc = glGetAttribLocation(shader, "u_Force");
-	glUniform3f(uForceLoc, 2.f, 0.f, 0.f);
+	int aPeriodLoc = glGetAttribLocation(shader, "a_Period");
+	glEnableVertexAttribArray(aPeriodLoc);
+	glVertexAttribPointer(aPeriodLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 14));
 
 	glDrawArrays(GL_TRIANGLES, 0, m_VBOParticleVertexCount);
 
@@ -355,8 +375,8 @@ void Renderer::CreateParticles(int count)
 {
 	int particleCounts = count;
 	int verticesCount = particleCounts * 6;
-	int floatCountsPerVertex = 3 + 1 + 4 + 1 + 3 + 1 + 1; 
-	// x, y, z, value, r, g, b, a, sTime, vx,  vy, vz, lifeTime, mass
+	int floatCountsPerVertex = 3 + 1 + 4 + 1 + 3 + 1 + 1 + 1; 
+	// x, y, z, value, r, g, b, a, sTime, vx,  vy, vz, lifeTime, mass, period
 	int totalFloatCounts = floatCountsPerVertex * verticesCount;
 	int floatCountsPerParticle = floatCountsPerVertex * 6;
 	
@@ -378,6 +398,7 @@ void Renderer::CreateParticles(int count)
 		float vz = 0.f;
 		float lifeTime = (float)rand() / (float)RAND_MAX * 1.5f;
 		float mass = (float)rand() / (float)RAND_MAX * 1.f + 1.f;
+		float period = (float)rand() / (float)RAND_MAX;
 
 		int index = i * floatCountsPerParticle;
 
@@ -419,6 +440,7 @@ void Renderer::CreateParticles(int count)
 			temp[index++] = vz; // vel z
 			temp[index++] = lifeTime; // lifeTime
 			temp[index++] = mass;
+			temp[index++] = period;
 		}
 	}
 	glGenBuffers(1, &m_VBOParticles);
