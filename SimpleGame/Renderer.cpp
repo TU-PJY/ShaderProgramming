@@ -1,7 +1,5 @@
 #include "stdafx.h"
 #include "Renderer.h"
-#include <vector>
-#include <random>
 
 Renderer::Renderer(int windowSizeX, int windowSizeY)
 {
@@ -28,27 +26,47 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Create Particles
 	CreateParticles(5000);
 
+	//Create Grid Mesh
+	CreateGridMesh(100, 100);
+
 	if (m_SolidRectShader > 0 && m_VBORect > 0)
 	{
 		m_Initialized = true;
 	}
 }
 
-void Renderer::DeleteAllShaderPrograms() {
-	glDeleteShader(m_TestShader);
+void Renderer::DeleteAllShaderPrograms()
+{
 	glDeleteShader(m_SolidRectShader);
+	glDeleteShader(m_TestShader);
 	glDeleteShader(m_ParticleShader);
 }
 
-void Renderer::CompileAllShaderPrograms() {
-	m_SolidRectShader = CompileShaders("./Shaders/Vertex_SolidRect.glsl", "./Shaders/Fragment_SolidRect.glsl");
-	m_TestShader      = CompileShaders("./Shaders/Vertex_Test.glsl", "./Shaders/Fragment_Test.glsl");
-	m_ParticleShader  = CompileShaders("./Shaders/Vertex_Particle.glsl", "./Shaders/Fragment_Particle.glsl");
+void Renderer::CompileAllShaderPrograms()
+{
+	m_SolidRectShader = CompileShaders(
+		"./Shaders/SolidRect_V.glsl",
+		"./Shaders/SolidRect_F.glsl");
+	m_TestShader = CompileShaders(
+		"./Shaders/Test_V.glsl",
+		"./Shaders/Test_F.glsl");
+	m_ParticleShader = CompileShaders(
+		"./Shaders/Particle_V.glsl",
+		"./Shaders/Particle_F.glsl");
+	m_GridMeshShader = CompileShaders(
+		"./Shaders/GridMesh_V.glsl",
+		"./Shaders/GridMesh_F.glsl");
 }
 
 bool Renderer::IsInitialized()
 {
 	return m_Initialized;
+}
+
+void Renderer::ReloadAllShaderPrograms()
+{
+	DeleteAllShaderPrograms();
+	CompileAllShaderPrograms();
 }
 
 void Renderer::CreateVertexBufferObjects()
@@ -107,6 +125,89 @@ void Renderer::CreateVertexBufferObjects()
 	glGenBuffers(1, &m_VBOTestColor);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestColor);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(testColor), testColor, GL_STATIC_DRAW);
+}
+
+void Renderer::CreateGridMesh(int x, int y)
+{
+	float basePosX = -0.5f;
+	float basePosY = -0.5f;
+	float targetPosX = 0.5f;
+	float targetPosY = 0.5f;
+
+	int pointCountX = x;
+	int pointCountY = y;
+
+	float width = targetPosX - basePosX;
+	float height = targetPosY - basePosY;
+
+	float* point = new float[pointCountX * pointCountY * 2];
+	float* vertices = new float[(pointCountX - 1) * (pointCountY - 1) * 2 * 3 * 3];
+	m_GridMeshVertexCount = (pointCountX - 1) * (pointCountY - 1) * 2 * 3;
+
+	//Prepare points
+	for (int x = 0; x < pointCountX; x++)
+	{
+		for (int y = 0; y < pointCountY; y++)
+		{
+			point[(y * pointCountX + x) * 2 + 0] = basePosX + width * (x / (float)(pointCountX - 1));
+			point[(y * pointCountX + x) * 2 + 1] = basePosY + height * (y / (float)(pointCountY - 1));
+		}
+	}
+
+	//Make triangles
+	int vertIndex = 0;
+	for (int x = 0; x < pointCountX - 1; x++)
+	{
+		for (int y = 0; y < pointCountY - 1; y++)
+		{
+			//Triangle part 1
+			vertices[vertIndex] = point[(y * pointCountX + x) * 2 + 0];
+			vertIndex++;
+			vertices[vertIndex] = point[(y * pointCountX + x) * 2 + 1];
+			vertIndex++;
+			vertices[vertIndex] = 0.f;
+			vertIndex++;
+			vertices[vertIndex] = point[((y + 1) * pointCountX + (x + 1)) * 2 + 0];
+			vertIndex++;
+			vertices[vertIndex] = point[((y + 1) * pointCountX + (x + 1)) * 2 + 1];
+			vertIndex++;
+			vertices[vertIndex] = 0.f;
+			vertIndex++;
+			vertices[vertIndex] = point[((y + 1) * pointCountX + x) * 2 + 0];
+			vertIndex++;
+			vertices[vertIndex] = point[((y + 1) * pointCountX + x) * 2 + 1];
+			vertIndex++;
+			vertices[vertIndex] = 0.f;
+			vertIndex++;
+
+			//Triangle part 2
+			vertices[vertIndex] = point[(y * pointCountX + x) * 2 + 0];
+			vertIndex++;
+			vertices[vertIndex] = point[(y * pointCountX + x) * 2 + 1];
+			vertIndex++;
+			vertices[vertIndex] = 0.f;
+			vertIndex++;
+			vertices[vertIndex] = point[(y * pointCountX + (x + 1)) * 2 + 0];
+			vertIndex++;
+			vertices[vertIndex] = point[(y * pointCountX + (x + 1)) * 2 + 1];
+			vertIndex++;
+			vertices[vertIndex] = 0.f;
+			vertIndex++;
+			vertices[vertIndex] = point[((y + 1) * pointCountX + (x + 1)) * 2 + 0];
+			vertIndex++;
+			vertices[vertIndex] = point[((y + 1) * pointCountX + (x + 1)) * 2 + 1];
+			vertIndex++;
+			vertices[vertIndex] = 0.f;
+			vertIndex++;
+		}
+	}
+
+	glGenBuffers(1, &m_GridMeshVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_GridMeshVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * (pointCountX - 1) * (pointCountY - 1) * 2 * 3 * 3, vertices, GL_STATIC_DRAW);
+
+	delete[] point;
+	delete[] vertices;
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -221,7 +322,7 @@ GLuint Renderer::CompileShaders(char* filenameVS, char* filenameFS)
 	}
 
 	glUseProgram(ShaderProgram);
-	std::cout << filenameVS << ", " << filenameFS << " Shader compiling is done.\n";
+	std::cout << filenameVS << ", " << filenameFS << " Shader compiling is done.";
 
 	return ShaderProgram;
 }
@@ -252,7 +353,7 @@ void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, flo
 
 void Renderer::DrawTest()
 {
-	m_Time += 0.000001;
+	m_Time += 0.016;
 
 	//Program select
 	glUseProgram(m_TestShader);
@@ -287,82 +388,87 @@ void Renderer::DrawParticle()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	m_Time += 0.01;
-
+	m_Time += 0.001;
 
 	//Program select
-	int stride = 15;
 	GLuint shader = m_ParticleShader;
 	glUseProgram(m_ParticleShader);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticles);
 
 	int uTimeLoc = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTimeLoc, m_Time);
+	
+	int uForceLoc = glGetUniformLocation(shader, "u_Force");
+	glUniform3f(uForceLoc, 2, 0, 0);
 
-	int uForceLoc = glGetAttribLocation(shader, "u_Force");
-	glUniform3f(uForceLoc, 2.f, 0.f, 0.f);
-
-	auto sendAttr = [&](const std::string& name, int numData, int numIndex)
-	{
-		auto location = glGetUniformLocation(shader, name.c_str());
-		glEnableVertexAttribArray(location);
-		glVertexAttribPointer(location, numData, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * numIndex));
-	};
-
-	/*sendAttr("a_Position", 3, 0);
-	sendAttr("a_Value", 1, 3);
-	sendAttr("a_Color", 4, 4);
-	sendAttr("a_sTime", 1, 8);
-	sendAttr("a_Vel", 3, 9);
-	sendAttr("a_lifeTime", 1, 12);
-	sendAttr("a_Mass", 1, 13);
-	sendAttr("a_Period", 1, 14);*/
+	int stride = 15;
 
 	int aPosLoc = glGetAttribLocation(shader, "a_Position");
+	int aValueLoc = glGetAttribLocation(shader, "a_Value");
+	int aColorLoc = glGetAttribLocation(shader, "a_Color");
+	int aSTimeLoc = glGetAttribLocation(shader, "a_STime");
+	int aVelLoc = glGetAttribLocation(shader, "a_Vel");
+	int aLifeTimeLoc = glGetAttribLocation(shader, "a_LifeTime");
+	int aMassLoc = glGetAttribLocation(shader, "a_Mass");
+	int aPeriodLoc = glGetAttribLocation(shader, "a_Period");
+
 	glEnableVertexAttribArray(aPosLoc);
+	glEnableVertexAttribArray(aValueLoc);
+	glEnableVertexAttribArray(aColorLoc);
+	glEnableVertexAttribArray(aSTimeLoc);
+	glEnableVertexAttribArray(aVelLoc);
+	glEnableVertexAttribArray(aLifeTimeLoc);
+	glEnableVertexAttribArray(aMassLoc);
+	glEnableVertexAttribArray(aPeriodLoc);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticles);
 	glVertexAttribPointer(aPosLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * stride, 0);
 
-	int aValueLoc = glGetAttribLocation(shader, "a_Value");
-	glEnableVertexAttribArray(aValueLoc);
 	glVertexAttribPointer(aValueLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 3));
 
-	int aColorLoc = glGetAttribLocation(shader, "a_Color");
-	glEnableVertexAttribArray(aColorLoc);
 	glVertexAttribPointer(aColorLoc, 4, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 4));
 
-	int aTimeLoc = glGetAttribLocation(shader, "a_sTime");
-	glEnableVertexAttribArray(aTimeLoc);
-	glVertexAttribPointer(aTimeLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 8));
+	glVertexAttribPointer(aSTimeLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 8));
 
-	int aVelLoc = glGetAttribLocation(shader, "a_Vel");
-	glEnableVertexAttribArray(aVelLoc);
 	glVertexAttribPointer(aVelLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 9));
 
-	int aLifeTimeLoc = glGetAttribLocation(shader, "a_lifeTime");
-	glEnableVertexAttribArray(aLifeTimeLoc);
 	glVertexAttribPointer(aLifeTimeLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 12));
 
-	int aMassLoc = glGetAttribLocation(shader, "a_Mass");
-	glEnableVertexAttribArray(aMassLoc);
 	glVertexAttribPointer(aMassLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 13));
 
-	int aPeriodLoc = glGetAttribLocation(shader, "a_Period");
-	glEnableVertexAttribArray(aPeriodLoc);
 	glVertexAttribPointer(aPeriodLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 14));
 
 	glDrawArrays(GL_TRIANGLES, 0, m_VBOParticleVertexCount);
 
-	//glDisableVertexAttribArray(aPosLoc);
-	//glDisableVertexAttribArray(aColorLoc);
+	glDisableVertexAttribArray(aPosLoc);
+	glDisableVertexAttribArray(aColorLoc);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glDisable(GL_BLEND);
 }
 
-void Renderer::ReloadAllShaderPrograms() {
-	DeleteAllShaderPrograms();
-	CompileAllShaderPrograms();
+void Renderer::DrawGridMesh()
+{
+	m_Time += 0.001;
+
+	//Program select
+	int shader = m_GridMeshShader;
+	glUseProgram(shader);
+
+	int uTimeLoc = glGetUniformLocation(shader, "u_Time");
+	glUniform1f(uTimeLoc, m_Time);
+
+	int attribPosition = glGetAttribLocation(shader, "a_Position");
+	glEnableVertexAttribArray(attribPosition);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_GridMeshVBO);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, m_GridMeshVertexCount);
+
+	glDisableVertexAttribArray(attribPosition);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::GetGLPosition(float x, float y, float *newX, float *newY)
@@ -375,136 +481,133 @@ void Renderer::CreateParticles(int count)
 {
 	int particleCounts = count;
 	int verticesCount = particleCounts * 6;
-	int floatCountsPerVertex = 3 + 1 + 4 + 1 + 3 + 1 + 1 + 1; 
-	// x, y, z, value, r, g, b, a, sTime, vx,  vy, vz, lifeTime, mass, period
+	int floatCountsPerVertex = 3 + 1 + 4 + 1 + 3 + 1 + 1 + 1; // x, y, z, value, r, g, b, a, sTime, vx, vy, vz, life, mass, period
 	int totalFloatCounts = floatCountsPerVertex * verticesCount;
 	int floatCountsPerParticle = floatCountsPerVertex * 6;
 	
-	std::vector<float> temp{};
-	temp.resize(totalFloatCounts);
+	float* temp = NULL;
+	temp = new float[totalFloatCounts];
 
-	for (int i = 0; i < particleCounts; i++) {
+	for (int i = 0; i < particleCounts; i++)
+	{
 		float size = 0.02 * (float)rand() / (float)RAND_MAX;
-		float centerX = 0.f;// (float)rand() / (float)RAND_MAX * 2.f - 1.f;
-		float centerY = 0.f;// (float)rand() / (float)RAND_MAX * 2.f - 1.f;
+		float centerX = 0; // (float)rand() / (float)RAND_MAX * 2.f - 1.f;
+		float centerY = 0; // (float)rand() / (float)RAND_MAX * 2.f - 1.f;
 		float value = (float)rand() / (float)RAND_MAX;
 		float r = (float)rand() / (float)RAND_MAX;
 		float g = (float)rand() / (float)RAND_MAX;
 		float b = (float)rand() / (float)RAND_MAX;
-		float a = 1.f;
-		float sTime = (float)rand() / (float)RAND_MAX * 2.f;
-		float vx = ((float)rand() / (float)RAND_MAX * 2.f - 1.f) * 3.f;
-		float vy = (float)rand() / (float)RAND_MAX * 10.f;
+		float a = 1;
+		float s_Time = (float)rand() / (float)RAND_MAX * 2.f;
+		float vx = ((float)rand() / (float)RAND_MAX * 2.f - 1.f)*3;
+		float vy = (float)rand() / (float)RAND_MAX * 5.f;
 		float vz = 0.f;
-		float lifeTime = (float)rand() / (float)RAND_MAX * 1.5f;
-		float mass = (float)rand() / (float)RAND_MAX * 1.f + 1.f;
-		float period = (float)rand() / (float)RAND_MAX;
-
+		float lifeTime = ((float)rand() / (float)RAND_MAX) * 1.f;
+		float mass = ((float)rand() / (float)RAND_MAX) * 1.f + 1.f;
+		float period = ((float)rand() / (float)RAND_MAX);
+		
 		int index = i * floatCountsPerParticle;
+		temp[index] = centerX - size; index++; //x
+		temp[index] = centerY - size; index++; //y
+		temp[index] = 0; index++; //z
+		temp[index] = value; index++; // value
+		temp[index] = r; index++; //r
+		temp[index] = g; index++; //g
+		temp[index] = b; index++; //b
+		temp[index] = a; index++; //a
+		temp[index] = s_Time; index++; //s_Time
+		temp[index] = vx; index++; //vx
+		temp[index] = vy; index++; //vy
+		temp[index] = vz; index++; //vz
+		temp[index] = lifeTime; index++; //life
+		temp[index] = mass; index++; //mass
+		temp[index] = period; index++; //period
 
-		for (int j = 0; j < 6; j++) {
-			if (j == 0) {
-				temp[index++] = centerX - size; //x
-				temp[index++] = centerY - size; //y
-			}
-			else if (j == 1) {
-				temp[index++] = centerX + size;
-				temp[index++] = centerY + size;
-			}
-			else if (j == 2) {
-				temp[index++] = centerX - size;
-				temp[index++] = centerY + size;
-			}
-			else if (j == 3) {
-				temp[index++] = centerX - size;
-				temp[index++] = centerY - size;
-			}
-			else if (j == 4) {
-				temp[index++] = centerX + size;
-				temp[index++] = centerY - size;
-			}
-			else if (j == 5) {
-				temp[index++] = centerX + size;
-				temp[index++] = centerY + size;
-			}
+		temp[index] = centerX + size; index++;
+		temp[index] = centerY + size; index++;
+		temp[index] = 0; index++;
+		temp[index] = value; index++;
+		temp[index] = r; index++; //r
+		temp[index] = g; index++; //g
+		temp[index] = b; index++; //b
+		temp[index] = a; index++; //a
+		temp[index] = s_Time; index++; //s_Time
+		temp[index] = vx; index++; //vx
+		temp[index] = vy; index++; //vy
+		temp[index] = vz; index++; //vz
+		temp[index] = lifeTime; index++; //life
+		temp[index] = mass; index++; //mass
+		temp[index] = period; index++; //period
 
-			temp[index++] = 0.f;   //z
-			temp[index++] = value; // value
-			temp[index++] = r;     //r
-			temp[index++] = g;     //g
-			temp[index++] = b;     //b
-			temp[index++] = a;     //a
-			temp[index++] = sTime; //time
-			temp[index++] = vx; // vel x
-			temp[index++] = vy; // vel y
-			temp[index++] = vz; // vel z
-			temp[index++] = lifeTime; // lifeTime
-			temp[index++] = mass;
-			temp[index++] = period;
-		}
+		temp[index] = centerX - size; index++;
+		temp[index] = centerY + size; index++;
+		temp[index] = 0; index++;
+		temp[index] = value; index++;
+		temp[index] = r; index++; //r
+		temp[index] = g; index++; //g
+		temp[index] = b; index++; //b
+		temp[index] = a; index++; //a
+		temp[index] = s_Time; index++; //s_Time
+		temp[index] = vx; index++; //vx
+		temp[index] = vy; index++; //vy
+		temp[index] = vz; index++; //vz
+		temp[index] = lifeTime; index++; //life
+		temp[index] = mass; index++; //mass
+		temp[index] = period; index++; //period
+
+		temp[index] = centerX - size; index++;
+		temp[index] = centerY - size; index++;
+		temp[index] = 0; index++;
+		temp[index] = value; index++;
+		temp[index] = r; index++; //r
+		temp[index] = g; index++; //g
+		temp[index] = b; index++; //b
+		temp[index] = a; index++; //a
+		temp[index] = s_Time; index++; //s_Time
+		temp[index] = vx; index++; //vx
+		temp[index] = vy; index++; //vy
+		temp[index] = vz; index++; //vz
+		temp[index] = lifeTime; index++; //life
+		temp[index] = mass; index++; //mass
+		temp[index] = period; index++; //period
+
+		temp[index] = centerX + size; index++;
+		temp[index] = centerY - size; index++;
+		temp[index] = 0; index++;
+		temp[index] = value; index++;
+		temp[index] = r; index++; //r
+		temp[index] = g; index++; //g
+		temp[index] = b; index++; //b
+		temp[index] = a; index++; //a
+		temp[index] = s_Time; index++; //s_Time
+		temp[index] = vx; index++; //vx
+		temp[index] = vy; index++; //vy
+		temp[index] = vz; index++; //vz
+		temp[index] = lifeTime; index++; //life
+		temp[index] = mass; index++; //mass
+		temp[index] = period; index++; //period
+
+		temp[index] = centerX + size; index++;
+		temp[index] = centerY + size; index++;
+		temp[index] = 0; index++;
+		temp[index] = value; index++;
+		temp[index] = r; index++; //r
+		temp[index] = g; index++; //g
+		temp[index] = b; index++; //b
+		temp[index] = a; index++; //a
+		temp[index] = s_Time; index++; //s_Time
+		temp[index] = vx; index++; //vx
+		temp[index] = vy; index++; //vy
+		temp[index] = vz; index++; //vz
+		temp[index] = lifeTime; index++; //life
+		temp[index] = mass; index++; //mass
+		temp[index] = period; index++; //period
 	}
 	glGenBuffers(1, &m_VBOParticles);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticles);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * totalFloatCounts, temp.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * totalFloatCounts, temp, GL_STATIC_DRAW);
+
+	delete[] temp;
+
 	m_VBOParticleVertexCount = verticesCount;
 }
-
-//temp[index] = centerX - size; index++; //x
-//temp[index] = centerY - size; index++; //y
-//temp[index] = 0; index++; //z
-//temp[index] = value; index++; // value
-//temp[index] = r; index++; //r
-//temp[index] = g; index++; //g
-//temp[index] = b; index++; //b
-//temp[index] = a; index++; //a
-//temp[index] = sTime; index++; //a
-
-//temp[index] = centerX + size; index++;
-//temp[index] = centerY + size; index++;
-//temp[index] = 0; index++;
-//temp[index] = value; index++;
-//temp[index] = r; index++; //r
-//temp[index] = g; index++; //g
-//temp[index] = b; index++; //b
-//temp[index] = a; index++; //a
-//temp[index] = sTime; index++; //sTime
-
-//temp[index] = centerX - size; index++;
-//temp[index] = centerY + size; index++;
-//temp[index] = 0; index++;
-//temp[index] = value; index++;
-//temp[index] = r; index++; //r
-//temp[index] = g; index++; //g
-//temp[index] = b; index++; //b
-//temp[index] = a; index++; //a
-//temp[index] = sTime; index++; //sTime
-
-//temp[index] = centerX - size; index++;
-//temp[index] = centerY - size; index++;
-//temp[index] = 0; index++;
-//temp[index] = value; index++;
-//temp[index] = r; index++; //r
-//temp[index] = g; index++; //g
-//temp[index] = b; index++; //b
-//temp[index] = a; index++; //a
-//temp[index] = sTime; index++; //sTime
-
-//temp[index] = centerX + size; index++;
-//temp[index] = centerY - size; index++;
-//temp[index] = 0; index++;
-//temp[index] = value; index++;
-//temp[index] = r; index++; //r
-//temp[index] = g; index++; //g
-//temp[index] = b; index++; //b
-//temp[index] = a; index++; //a
-//temp[index] = sTime; index++; //sTime
-
-//temp[index] = centerX + size; index++;
-//temp[index] = centerY + size; index++;
-//temp[index] = 0; index++;
-//temp[index] = value; index++;
-//temp[index] = r; index++; //r
-//temp[index] = g; index++; //g
-//temp[index] = b; index++; //b
-//temp[index] = a; index++; //a
-//temp[index] = sTime; index++; //sTime

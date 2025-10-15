@@ -16,14 +16,11 @@
     <Filter Include="소스 파일\Shaders">
       <UniqueIdentifier>{aa86e47f-445f-4440-9a76-173363b46c4e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Shaders\Particle">
-      <UniqueIdentifier>{4dff9681-be0f-4e76-b466-174008a3035b}</UniqueIdentifier>
+    <Filter Include="소스 파일\Shaders\[Vertex]">
+      <UniqueIdentifier>{8530c139-483d-4361-980d-ea32eeb9962a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Shaders\Test">
-      <UniqueIdentifier>{991138f3-4ba0-44dc-b9dd-f145a15d2956}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\Shaders\SolidRect">
-      <UniqueIdentifier>{dbe64751-46f2-4abe-a1b0-36964bc69dcc}</UniqueIdentifier>
+    <Filter Include="소스 파일\Shaders\[Fragment">
+      <UniqueIdentifier>{8189f7ed-47c0-42cd-8ebe-b400f45331b9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -52,23 +49,29 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Fragment_Test.glsl">
-      <Filter>소스 파일\Shaders\Test</Filter>
+    <None Include="Shaders\GridMesh_V.glsl">
+      <Filter>소스 파일\Shaders\[Vertex]</Filter>
     </None>
-    <None Include="Shaders\Fragment_Particle.glsl">
-      <Filter>소스 파일\Shaders\Particle</Filter>
+    <None Include="Shaders\Particle_V.glsl">
+      <Filter>소스 파일\Shaders\[Vertex]</Filter>
     </None>
-    <None Include="Shaders\Vertex_Particle.glsl">
-      <Filter>소스 파일\Shaders\Particle</Filter>
+    <None Include="Shaders\SolidRect_V.glsl">
+      <Filter>소스 파일\Shaders\[Vertex]</Filter>
     </None>
-    <None Include="Shaders\Vertex_SolidRect.glsl">
-      <Filter>소스 파일\Shaders\SolidRect</Filter>
+    <None Include="Shaders\Test_V.glsl">
+      <Filter>소스 파일\Shaders\[Vertex]</Filter>
     </None>
-    <None Include="Shaders\Fragment_SolidRect.glsl">
-      <Filter>소스 파일\Shaders\SolidRect</Filter>
+    <None Include="Shaders\Particle_F.glsl">
+      <Filter>소스 파일\Shaders\[Fragment</Filter>
     </None>
-    <None Include="Shaders\Vertex_Test.glsl">
-      <Filter>소스 파일\Shaders\Test</Filter>
+    <None Include="Shaders\GridMesh_F.glsl">
+      <Filter>소스 파일\Shaders\[Fragment</Filter>
+    </None>
+    <None Include="Shaders\SolidRect_F.glsl">
+      <Filter>소스 파일\Shaders\[Fragment</Filter>
+    </None>
+    <None Include="Shaders\Test_F.glsl">
+      <Filter>소스 파일\Shaders\[Fragment</Filter>
     </None>
   </ItemGroup>
 </Project>
