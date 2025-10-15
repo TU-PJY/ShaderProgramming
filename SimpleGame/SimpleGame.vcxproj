@@ -170,6 +170,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="FullscreenColor_F.glsl" />
+    <None Include="FullscreenColor_V.glsl" />
     <None Include="Shaders\GridMesh_F.glsl" />
     <None Include="Shaders\GridMesh_V.glsl" />
     <None Include="Shaders\Particle_F.glsl" />

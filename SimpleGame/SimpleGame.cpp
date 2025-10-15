@@ -26,14 +26,15 @@ void RenderScene(void)
 		g_Renderer->ReloadAllShaderPrograms();
 		g_bNeedReloadShaderPrograms = false;
 	}
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	g_Renderer->DrawFullscreenColor(0.f, 0.f, 0.f, 0.2f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.f);
 
 	// Renderer Test
 	//g_Renderer->DrawSolidRect(0, 0, 0, 4, 1, 0, 1, 1);
 	//g_Renderer->DrawTest();
 	g_Renderer->DrawGridMesh();
-	g_Renderer->DrawParticle();
+	//g_Renderer->DrawParticle();
 
 	glutSwapBuffers();
 }
@@ -71,11 +72,12 @@ int main(int argc, char **argv)
 	glutInitWindowPosition(0, 0);
 	glutInitWindowSize(500, 500);
 	glutCreateWindow("Game Software Engineering KPU");
+	glEnable(GL_MULTISAMPLE);
 
 	glewInit();
 	if (glewIsSupported("GL_VERSION_3_0"))
 	{
-		std::cout << " GLEW Version is 3.0\n ";
+		std::cout << "GLEW Version is 3.0\n";
 	}
 	else
 	{

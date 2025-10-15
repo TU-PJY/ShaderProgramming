@@ -19,7 +19,7 @@
     <Filter Include="소스 파일\Shaders\[Vertex]">
       <UniqueIdentifier>{8530c139-483d-4361-980d-ea32eeb9962a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Shaders\[Fragment">
+    <Filter Include="소스 파일\Shaders\[Fragment]">
       <UniqueIdentifier>{8189f7ed-47c0-42cd-8ebe-b400f45331b9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -62,16 +62,22 @@
       <Filter>소스 파일\Shaders\[Vertex]</Filter>
     </None>
     <None Include="Shaders\Particle_F.glsl">
-      <Filter>소스 파일\Shaders\[Fragment</Filter>
+      <Filter>소스 파일\Shaders\[Fragment]</Filter>
     </None>
     <None Include="Shaders\GridMesh_F.glsl">
-      <Filter>소스 파일\Shaders\[Fragment</Filter>
+      <Filter>소스 파일\Shaders\[Fragment]</Filter>
     </None>
     <None Include="Shaders\SolidRect_F.glsl">
-      <Filter>소스 파일\Shaders\[Fragment</Filter>
+      <Filter>소스 파일\Shaders\[Fragment]</Filter>
     </None>
     <None Include="Shaders\Test_F.glsl">
-      <Filter>소스 파일\Shaders\[Fragment</Filter>
+      <Filter>소스 파일\Shaders\[Fragment]</Filter>
+    </None>
+    <None Include="FullscreenColor_V.glsl">
+      <Filter>소스 파일\Shaders\[Vertex]</Filter>
+    </None>
+    <None Include="FullscreenColor_F.glsl">
+      <Filter>소스 파일\Shaders\[Fragment]</Filter>
     </None>
   </ItemGroup>
 </Project>

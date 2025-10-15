@@ -8,8 +8,7 @@ uniform float u_Time;
 
 const float c_PI = 3.141592;
 
-void main()
-{
+void Flag() {
 	vec4 newPosition = vec4(a_Position, 1);
 	
 	float value = (a_Position.x + 0.5)*2*c_PI;
@@ -24,4 +23,24 @@ void main()
 	gl_Position = newPosition;
 
 	v_Color = vec4(shading);
+}
+
+void Wave() {
+	vec4 newPosition = vec4(a_Position, 1);
+	gl_Position = newPosition;
+	float dist = distance(a_Position.xy, vec2(0, 0));
+//	float inputTime = u_Time;
+//	inputTime = fract(inputTime);
+//	float value = clamp(0.5 - dist, 0, 1);
+//	value = ceil(value);
+//	value =  (0.5 - dist) * 100;
+
+	float value = ceil(sin(dist * 20 * c_PI - u_Time * 10));
+	float p = 1 - clamp(dist * 2, 0 ,1);
+	v_Color = vec4(value * p);
+}
+
+void main()
+{
+	Wave();
 }
