@@ -37,6 +37,7 @@ void Wave() {
 
 	float value = ceil(sin(dist * 20 * c_PI - u_Time * 10));
 	float p = 1 - clamp(dist * 2, 0 ,1);
+	value = (sin(dist * 20 * c_PI - u_Time * 10)) * 100 * p;
 	v_Color = vec4(value * p);
 }
 
