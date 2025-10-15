@@ -353,7 +353,8 @@ void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, flo
 
 void Renderer::DrawTest()
 {
-	m_Time += 0.016;
+	static float m_Time;
+	m_Time += 0.01;
 
 	//Program select
 	glUseProgram(m_TestShader);
@@ -388,7 +389,8 @@ void Renderer::DrawParticle()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	m_Time += 0.001;
+	static float m_Time;
+	m_Time += 0.01;
 
 	//Program select
 	GLuint shader = m_ParticleShader;
@@ -449,7 +451,8 @@ void Renderer::DrawParticle()
 
 void Renderer::DrawGridMesh()
 {
-	m_Time += 0.001;
+	static float m_Time;
+	m_Time += 0.01;
 
 	//Program select
 	int shader = m_GridMeshShader;
