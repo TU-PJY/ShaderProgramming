@@ -26,15 +26,15 @@ void RenderScene(void)
 		g_Renderer->ReloadAllShaderPrograms();
 		g_bNeedReloadShaderPrograms = false;
 	}
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	g_Renderer->DrawFullscreenColor(0.f, 0.f, 0.f, 0.2f);
-	glClearColor(0.0f, 0.0f, 0.0f, 0.f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//g_Renderer->DrawFullScreenColor(0, 0, 0, 0.6);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	// Renderer Test
 	//g_Renderer->DrawSolidRect(0, 0, 0, 4, 1, 0, 1, 1);
 	//g_Renderer->DrawTest();
-	g_Renderer->DrawGridMesh();
 	//g_Renderer->DrawParticle();
+	g_Renderer->DrawGridMesh();
 
 	glutSwapBuffers();
 }
@@ -65,19 +65,18 @@ void SpecialKeyInput(int key, int x, int y)
 }
 
 int main(int argc, char **argv)
-{ 
+{
 	// Initialize GL things
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(0, 0);
 	glutInitWindowSize(500, 500);
 	glutCreateWindow("Game Software Engineering KPU");
-	glEnable(GL_MULTISAMPLE);
 
 	glewInit();
 	if (glewIsSupported("GL_VERSION_3_0"))
 	{
-		std::cout << "GLEW Version is 3.0\n";
+		std::cout << " GLEW Version is 3.0\n ";
 	}
 	else
 	{
@@ -85,7 +84,7 @@ int main(int argc, char **argv)
 	}
 
 	// Initialize Renderer
-	g_Renderer = new Renderer(500, 500);
+	g_Renderer = new Renderer(1000, 1000);
 	if (!g_Renderer->IsInitialized())
 	{
 		std::cout << "Renderer could not be initialized.. \n";

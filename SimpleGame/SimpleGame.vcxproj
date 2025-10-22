@@ -170,16 +170,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="FullscreenColor_F.glsl" />
-    <None Include="FullscreenColor_V.glsl" />
-    <None Include="Shaders\GridMesh_F.glsl" />
-    <None Include="Shaders\GridMesh_V.glsl" />
-    <None Include="Shaders\Particle_F.glsl" />
-    <None Include="Shaders\Particle_V.glsl" />
-    <None Include="Shaders\SolidRect_F.glsl" />
-    <None Include="Shaders\SolidRect_V.glsl" />
-    <None Include="Shaders\Test_F.glsl" />
-    <None Include="Shaders\Test_V.glsl" />
+    <None Include="Shaders\FullScreenColor.fs" />
+    <None Include="Shaders\FullScreenColor.vs" />
+    <None Include="Shaders\GridMesh.fs" />
+    <None Include="Shaders\GridMesh.vs" />
+    <None Include="Shaders\Particle.fs" />
+    <None Include="Shaders\Particle.vs" />
+    <None Include="Shaders\SolidRect.fs" />
+    <None Include="Shaders\SolidRect.vs" />
+    <None Include="Shaders\Test.fs" />
+    <None Include="Shaders\Test.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

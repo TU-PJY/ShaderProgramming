@@ -7,6 +7,7 @@
 
 #include "Dependencies\glew.h"
 
+#define MAX_POINTS 500
 class Renderer
 {
 public:
@@ -19,22 +20,22 @@ public:
 	void DrawTest();
 	void DrawParticle();
 	void DrawGridMesh();
-	void DrawFullscreenColor(float r, float g, float b, float a);
+	void DrawFullScreenColor(float r, float g, float b, float a);
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
 	void DeleteAllShaderPrograms();
 	void CompileAllShaderPrograms();
-	bool ReadFile(char* filename, std::string* target);
+	bool ReadFile(char* filename, std::string *target);
 	void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType);
 	GLuint CompileShaders(char* filenameVS, char* filenameFS);
 	void CreateVertexBufferObjects();
-	void GetGLPosition(float x, float y, float* newX, float* newY);
+	void GetGLPosition(float x, float y, float *newX, float *newY);
 	void CreateParticles(int count);
 	void CreateGridMesh(int x, int y);
 
 	bool m_Initialized = false;
-
+	
 	unsigned int m_WindowSizeX = 0;
 	unsigned int m_WindowSizeY = 0;
 
@@ -51,12 +52,17 @@ private:
 	GLuint m_VBOParticleVertexCount = 0;
 	GLuint m_ParticleShader = 0;
 
+	//Grid Mesh
 	GLuint m_GridMeshVBO = 0;
 	GLuint m_GridMeshVertexCount = 0;
 	GLuint m_GridMeshShader = 0;
 
-	// fullscreen
-	GLuint m_FullscreenVBO{};
-	GLuint m_FullscreenShader{};
+	//full screen
+	GLuint m_FullScreenVBO = 0;
+	GLuint m_FullScreenShader = 0;
+
+	//rain drop
+	float m_Points[MAX_POINTS * 4];
+	float m_DropCount = 500;
 };
 
