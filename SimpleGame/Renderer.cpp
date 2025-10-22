@@ -16,7 +16,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Set window size
 	m_WindowSizeX = windowSizeX;
 	m_WindowSizeY = windowSizeY;
-
+	
 	//Load shaders
 	CompileAllShaderPrograms();
 	
