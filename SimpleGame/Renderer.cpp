@@ -75,6 +75,9 @@ void Renderer::CompileAllShaderPrograms()
 	m_FullScreenShader = CompileShaders(
 		"./Shaders/FullScreenColor.vs",
 		"./Shaders/FullScreenColor.fs");
+	m_FSShader = CompileShaders(
+		"./Shaders/FS_vertex.glsl",
+		"./Shaders/FS_fragment.glsl");
 }
 
 bool Renderer::IsInitialized()
@@ -155,6 +158,21 @@ void Renderer::CreateVertexBufferObjects()
 	glBindBuffer(GL_ARRAY_BUFFER, m_FullScreenVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(fullRect), fullRect, GL_STATIC_DRAW);
 
+
+	float fullRectFS[]
+		=
+	{
+		-1, -1, 0, 
+		1, 1, 0, 
+		-1, 1, 0, //Triangle1
+
+		-1, -1, 0, 
+		1, -1, 0, 
+		1, 1, 0 //Triangle2
+	};
+	glGenBuffers(1, &m_FSVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_FSVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(fullRectFS), fullRectFS, GL_STATIC_DRAW);
 }
 
 void Renderer::CreateGridMesh(int x, int y)
@@ -352,7 +370,7 @@ GLuint Renderer::CompileShaders(char* filenameVS, char* filenameFS)
 	}
 
 	glUseProgram(ShaderProgram);
-	std::cout << filenameVS << ", " << filenameFS << " Shader compiling is done.";
+	std::cout << filenameVS << ", " << filenameFS << " Shader compiling is done.\n";
 
 	return ShaderProgram;
 }
@@ -528,6 +546,19 @@ void Renderer::DrawFullScreenColor(float r, float g, float b, float a)
 
 	glDisableVertexAttribArray(attribPosition);
 
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Renderer::DrawFS() {
+	//Program select
+	int shader = m_FSShader;
+	glUseProgram(shader);
+	int attribPosition = glGetAttribLocation(shader, "a_Position");
+	glEnableVertexAttribArray(attribPosition);
+	glBindBuffer(GL_ARRAY_BUFFER, m_FSVBO);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDisableVertexAttribArray(attribPosition);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
