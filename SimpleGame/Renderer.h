@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "Dependencies\glew.h"
+#include "LoadPng.h"
 
 #define MAX_POINTS 500
 class Renderer

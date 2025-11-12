@@ -162,13 +162,13 @@ void Renderer::CreateVertexBufferObjects()
 	float fullRectFS[]
 		=
 	{
-		-1, -1, 0, 
-		1, 1, 0, 
-		-1, 1, 0, //Triangle1
+		-1, -1, 0, 0, 1,
+		 1,  1, 0, 1, 0,
+		-1,  1, 0, 0, 0,//Triangle1
 
-		-1, -1, 0, 
-		1, -1, 0, 
-		1, 1, 0 //Triangle2
+		-1, -1, 0, 0, 1,
+		 1, -1, 0, 1, 1,
+		 1,  1, 0, 1, 0 //Triangle2
 	};
 	glGenBuffers(1, &m_FSVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_FSVBO);
@@ -554,11 +554,18 @@ void Renderer::DrawFS() {
 	int shader = m_FSShader;
 	glUseProgram(shader);
 	int attribPosition = glGetAttribLocation(shader, "a_Position");
+	int attribTextPosition = glGetAttribLocation(shader, "a_TexPos");
 	glEnableVertexAttribArray(attribPosition);
+	glEnableVertexAttribArray(attribTextPosition);
+
 	glBindBuffer(GL_ARRAY_BUFFER, m_FSVBO);
-	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(attribTextPosition, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+
 	glDisableVertexAttribArray(attribPosition);
+	glDisableVertexAttribArray(attribTextPosition);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
