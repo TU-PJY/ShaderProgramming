@@ -26,6 +26,7 @@ public:
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
+	GLuint CreatePngTexture(char* filePath, GLuint samplingMethod);
 	void DeleteAllShaderPrograms();
 	void CompileAllShaderPrograms();
 	bool ReadFile(char* filename, std::string *target);
@@ -70,5 +71,7 @@ private:
 	// fragment shader factory
 	GLuint m_FSVBO{};
 	GLuint m_FSShader{};
+
+	GLuint m_RGBTexture{};
 };
 

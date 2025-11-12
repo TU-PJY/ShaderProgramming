@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Renderer.h"
+#include <cassert>
 
 Renderer::Renderer(int windowSizeX, int windowSizeY)
 {
@@ -47,6 +48,8 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	{
 		m_Initialized = true;
 	}
+
+	m_RGBTexture = CreatePngTexture("textures//rgb.png", GL_NEAREST);
 }
 
 void Renderer::DeleteAllShaderPrograms()
@@ -177,10 +180,10 @@ void Renderer::CreateVertexBufferObjects()
 
 void Renderer::CreateGridMesh(int x, int y)
 {
-	float basePosX = -1.f;
-	float basePosY = -1.f;
-	float targetPosX = 1.f;
-	float targetPosY = 1.f;
+	float basePosX = -0.5f;
+	float basePosY = -0.5f;
+	float targetPosX = 0.5f;
+	float targetPosY = 0.5f;
 
 	int pointCountX = x;
 	int pointCountY = y;
@@ -497,7 +500,7 @@ void Renderer::DrawParticle()
 
 void Renderer::DrawGridMesh()
 {
-	m_Time += 0.01;
+	m_Time += 0.002;
 
 	//Program select
 	int shader = m_GridMeshShader;
@@ -514,6 +517,12 @@ void Renderer::DrawGridMesh()
 
 	int attribPosition = glGetAttribLocation(shader, "a_Position");
 	glEnableVertexAttribArray(attribPosition);
+
+	int samplerRGB = glGetUniformLocation(shader, "u_RGBTexture");
+	glUniform1i(samplerRGB, 0);
+	glBindTexture(GL_TEXTURE_2D, m_RGBTexture);
+
+	int time = glGetUniformLocation(shader, "u_Time");
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_GridMeshVBO);
 	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
@@ -553,8 +562,12 @@ void Renderer::DrawFS() {
 	//Program select
 	int shader = m_FSShader;
 	glUseProgram(shader);
+
 	int attribPosition = glGetAttribLocation(shader, "a_Position");
 	int attribTextPosition = glGetAttribLocation(shader, "a_TexPos");
+	int samplerRGB = glGetUniformLocation(shader, "u_RGBTexture");
+	int time = glGetUniformLocation(shader, "u_Time");
+
 	glEnableVertexAttribArray(attribPosition);
 	glEnableVertexAttribArray(attribTextPosition);
 
@@ -562,11 +575,42 @@ void Renderer::DrawFS() {
 
 	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
 	glVertexAttribPointer(attribTextPosition, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
+
+	m_Time += 0.001;
+	glUniform1f(time, m_Time);
+	glUniform1i(samplerRGB, 0);
+	glBindTexture(GL_TEXTURE_2D, m_RGBTexture);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glDisableVertexAttribArray(attribPosition);
 	glDisableVertexAttribArray(attribTextPosition);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+
+GLuint Renderer::CreatePngTexture(char* filePath, GLuint samplingMethod) {
+	//Load Png
+	std::vector<unsigned char> image;
+	unsigned width, height;
+	unsigned error = lodepng::decode(image, width, height, filePath);
+	if (error != 0)
+	{
+		std::cout << "PNG image loading failed:" << filePath << std::endl;
+		assert(0);
+	}
+
+	GLuint temp;
+	glGenTextures(1, &temp);
+	glBindTexture(GL_TEXTURE_2D, temp);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+				 GL_UNSIGNED_BYTE, &image[0]);
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, samplingMethod);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, samplingMethod);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+	return temp;
 }
 
 void Renderer::GetGLPosition(float x, float y, float *newX, float *newY)
