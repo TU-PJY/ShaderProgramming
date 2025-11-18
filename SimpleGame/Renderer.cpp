@@ -73,8 +73,8 @@ void Renderer::CompileAllShaderPrograms()
 		"./Shaders/Particle.vs",
 		"./Shaders/Particle.fs");
 	m_GridMeshShader = CompileShaders(
-		"./Shaders/GridMesh.vs",
-		"./Shaders/GridMesh.fs");
+		"./Shaders/GridMesh_vs.glsl",
+		"./Shaders/GridMesh_fs.glsl");
 	m_FullScreenShader = CompileShaders(
 		"./Shaders/FullScreenColor.vs",
 		"./Shaders/FullScreenColor.fs");
