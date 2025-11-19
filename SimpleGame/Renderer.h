@@ -26,7 +26,7 @@ public:
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
-	GLuint CreatePngTexture(char* filePath, GLuint samplingMethod);
+	GLuint CreatePngTexture(const char * filePath, GLuint samplingMethod);
 	void DeleteAllShaderPrograms();
 	void CompileAllShaderPrograms();
 	bool ReadFile(char* filename, std::string *target);
@@ -36,6 +36,7 @@ private:
 	void GetGLPosition(float x, float y, float *newX, float *newY);
 	void CreateParticles(int count);
 	void CreateGridMesh(int x, int y);
+	float GetDelta();
 
 	bool m_Initialized = false;
 	
@@ -73,5 +74,8 @@ private:
 	GLuint m_FSShader{};
 
 	GLuint m_RGBTexture{};
+
+	GLuint m_NumTexture[10]{};
+	GLuint m_TotalNumTexture{};
 };
 

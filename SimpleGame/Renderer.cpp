@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Renderer.h"
+#include "Dependencies\freeglut.h"
 #include <cassert>
+#include <string>
 
 Renderer::Renderer(int windowSizeX, int windowSizeY)
 {
@@ -50,6 +52,13 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	}
 
 	m_RGBTexture = CreatePngTexture("textures//rgb.png", GL_NEAREST);
+
+	for (int i = 0; i < 10; i++) {
+		std::string dir = "textures//" + std::to_string(i) + ".png";
+		m_NumTexture[i] = CreatePngTexture(dir.c_str(), GL_NEAREST);
+	}
+
+	m_TotalNumTexture = CreatePngTexture("textures//numbers.png", GL_NEAREST);
 }
 
 void Renderer::DeleteAllShaderPrograms()
@@ -259,6 +268,16 @@ void Renderer::CreateGridMesh(int x, int y)
 
 	delete[] point;
 	delete[] vertices;
+}
+
+float Renderer::GetDelta() {
+	static float Prev{};
+	static float Curr{};
+	static float Delta{};
+	Prev = (float)glutGet(GLUT_ELAPSED_TIME) / 1000.f;
+	Delta = Prev - Curr;
+	Curr = Prev;
+	return Delta;
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -566,6 +585,10 @@ void Renderer::DrawFS() {
 	int attribPosition = glGetAttribLocation(shader, "a_Position");
 	int attribTextPosition = glGetAttribLocation(shader, "a_TexPos");
 	int samplerRGB = glGetUniformLocation(shader, "u_RGBTexture");
+	int samplerNum = glGetUniformLocation(shader, "u_NumTexture");
+	int samplerTotal = glGetUniformLocation(shader, "u_TotalNumTexture");
+	int number = glGetUniformLocation(shader, "u_Num");
+	int digit = glGetUniformLocation(shader, "u_NumDigits");
 	int time = glGetUniformLocation(shader, "u_Time");
 
 	glEnableVertexAttribArray(attribPosition);
@@ -576,11 +599,62 @@ void Renderer::DrawFS() {
 	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
 	glVertexAttribPointer(attribTextPosition, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
 
-	m_Time += 0.001;
+	m_Time += GetDelta() * 20.f;
+
 	glUniform1f(time, m_Time);
-	glUniform1i(samplerRGB, 0);
-	glBindTexture(GL_TEXTURE_2D, m_RGBTexture);
+	//glUniform1i(samplerRGB, 1);
+
+	auto getDigit = [](long long n) {
+		if (n == 0) return 1;
+		if (n < 0) n = std::llabs(n);
+		int cnt = 0;
+		while (n > 0) {
+			n /= 10;
+			++cnt;
+		}
+		return cnt;
+	};
+
+	int curr = (int)(m_Time);
+	int di = getDigit(curr);
+
+	glUniform1i(samplerTotal, 0);
+	glUniform1i(number, curr);
+	glUniform1i(digit, di);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_TotalNumTexture);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	/*glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_NumTexture[1]);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, m_NumTexture[2]);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, m_NumTexture[3]);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, m_NumTexture[4]);
+
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, m_NumTexture[5]);
+
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, m_NumTexture[6]);
+
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, m_NumTexture[7]);
+
+	glActiveTexture(GL_TEXTURE8);
+	glBindTexture(GL_TEXTURE_2D, m_NumTexture[8]);
+
+	glActiveTexture(GL_TEXTURE9);
+	glBindTexture(GL_TEXTURE_2D, m_NumTexture[9]);
+
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_2D, m_TotalNumTexture);*/
+
 
 	glDisableVertexAttribArray(attribPosition);
 	glDisableVertexAttribArray(attribTextPosition);
@@ -588,7 +662,7 @@ void Renderer::DrawFS() {
 }
 
 
-GLuint Renderer::CreatePngTexture(char* filePath, GLuint samplingMethod) {
+GLuint Renderer::CreatePngTexture(const char* filePath, GLuint samplingMethod) {
 	//Load Png
 	std::vector<unsigned char> image;
 	unsigned width, height;
