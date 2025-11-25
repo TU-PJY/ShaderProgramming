@@ -59,6 +59,8 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	}
 
 	m_TotalNumTexture = CreatePngTexture("textures//numbers.png", GL_NEAREST);
+
+	CreateFBOs();
 }
 
 void Renderer::DeleteAllShaderPrograms()
@@ -90,6 +92,9 @@ void Renderer::CompileAllShaderPrograms()
 	m_FSShader = CompileShaders(
 		"./Shaders/FS_vertex.glsl",
 		"./Shaders/FS_fragment.glsl");
+	m_TexShader = CompileShaders(
+		"./Shaders/Texture_vertex.glsl",
+		"./Shaders/Texture_fragment.glsl");
 }
 
 bool Renderer::IsInitialized()
@@ -185,6 +190,22 @@ void Renderer::CreateVertexBufferObjects()
 	glGenBuffers(1, &m_FSVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_FSVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(fullRectFS), fullRectFS, GL_STATIC_DRAW);
+
+
+	float texRect[]
+		=
+	{
+		-1, -1, 0, 0, 1,
+		1,  1, 0, 1, 0,
+		-1,  1, 0, 0, 0,//Triangle1
+
+		-1, -1, 0, 0, 1,
+		1, -1, 0, 1, 1,
+		1,  1, 0, 1, 0 //Triangle2
+	};
+	glGenBuffers(1, &m_TexVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_TexVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(texRect), texRect, GL_STATIC_DRAW);
 }
 
 void Renderer::CreateGridMesh(int x, int y)
@@ -458,7 +479,7 @@ void Renderer::DrawParticle()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	m_Time += 0.00016;
+	m_Time += GetDelta();
 
 	//Program select
 	GLuint shader = m_ParticleShader;
@@ -519,7 +540,7 @@ void Renderer::DrawParticle()
 
 void Renderer::DrawGridMesh()
 {
-	m_Time += 0.002;
+	m_Time += GetDelta();
 
 	//Program select
 	int shader = m_GridMeshShader;
@@ -661,7 +682,6 @@ void Renderer::DrawFS() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-
 GLuint Renderer::CreatePngTexture(const char* filePath, GLuint samplingMethod) {
 	//Load Png
 	std::vector<unsigned char> image;
@@ -691,6 +711,105 @@ void Renderer::GetGLPosition(float x, float y, float *newX, float *newY)
 {
 	*newX = x * 2.f / m_WindowSizeX;
 	*newY = y * 2.f / m_WindowSizeY;
+}
+
+void Renderer::DrawDebugTextures() {
+	//DrawTexture(-0.5, -0.5, 0.5, 0.5, m_RT[0]);
+	//DrawTexture(0.5, -0.5, 0.5, 0.5, m_RT[1]);
+}
+
+void Renderer::DrawFBOs() {
+	//fbo 0
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO[0]);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	DrawParticle();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO[1]);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	DrawGridMesh();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO[2]);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	DrawFS();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	DrawTexture(-0.5, -0.5, 0.5, 0.5, m_RT[0]);
+	DrawTexture(0.5, 0.5, 0.5, 0.5, m_RT[1]);
+	DrawTexture(0.5, -0.5, 0.5, 0.5, m_RT[2]);
+}
+
+void Renderer::DrawTexture(float x, float y, float sx, float sy, GLuint texID) {
+	//Program select
+	int shader = m_TexShader;
+	glUseProgram(shader);
+
+	int uTex = glGetUniformLocation(shader, "u_TexID");
+	glUniform1i(uTex, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texID);
+
+	int uTrans = glGetUniformLocation(shader, "u_Trans");
+	int uScale = glGetUniformLocation(shader, "u_Scale");
+	glUniform2f(uTrans, x, y);
+	glUniform2f(uScale, sx, sy);
+
+	int aPos = glGetAttribLocation(shader, "a_Pos");
+	int aTex = glGetAttribLocation(shader, "a_Tex");
+	glEnableVertexAttribArray(aPos);
+	glEnableVertexAttribArray(aTex);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_TexVBO);
+	glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(aTex, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Renderer::CreateFBOs() {
+	// color 
+	for (int i = 0; i < 5; i++) {
+		glGenTextures(1, &m_RT[i]);
+		glBindTexture(GL_TEXTURE_2D, m_RT[i]);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	}
+
+	// depth
+	GLuint depthBuffer; 
+	glGenRenderbuffers(1, &depthBuffer); 
+	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer); 
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 512, 512); 
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	for (int i = 0; i < 5; i++) {
+		// fbo
+		glGenFramebuffers(1, &m_FBO[i]);
+
+		// color attach
+		glBindFramebuffer(GL_FRAMEBUFFER, m_FBO[i]);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_RT[i], 0); 
+
+		// depth attach
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer); 
+	}
+
+	// check
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER); 
+	if (status != GL_FRAMEBUFFER_COMPLETE)
+		assert(0);
+
+	// restore
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::CreateParticles(int count)

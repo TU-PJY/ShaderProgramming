@@ -85,5 +85,11 @@
     <None Include="Shaders\FS_fragment.glsl">
       <Filter>소스 파일\Shaders</Filter>
     </None>
+    <None Include="Shaders\Texture_fragment.glsl">
+      <Filter>소스 파일\Shaders</Filter>
+    </None>
+    <None Include="Shaders\Texture_vertex.glsl">
+      <Filter>소스 파일\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -35,7 +35,9 @@ void RenderScene(void)
 	//g_Renderer->DrawTest();
 	//g_Renderer->DrawParticle();
 	//g_Renderer->DrawGridMesh();
-	g_Renderer->DrawFS();
+	//g_Renderer->DrawFS();
+	g_Renderer->DrawFBOs();
+//	g_Renderer->DrawDebugTextures();
 
 	glutSwapBuffers();
 }

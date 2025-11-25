@@ -23,6 +23,8 @@ public:
 	void DrawGridMesh();
 	void DrawFullScreenColor(float r, float g, float b, float a);
 	void DrawFS();
+	void DrawDebugTextures();
+	void DrawFBOs();
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
@@ -37,6 +39,9 @@ private:
 	void CreateParticles(int count);
 	void CreateGridMesh(int x, int y);
 	float GetDelta();
+	void DrawTexture(float x, float y, float sx, float sy, GLuint texID);
+	void CreateFBOs();
+
 
 	bool m_Initialized = false;
 	
@@ -72,6 +77,12 @@ private:
 	// fragment shader factory
 	GLuint m_FSVBO{};
 	GLuint m_FSShader{};
+
+	GLuint m_TexVBO{};
+	GLuint m_TexShader{};
+
+	GLuint m_FBO[5]{};
+	GLuint m_RT[5]{};
 
 	GLuint m_RGBTexture{};
 
