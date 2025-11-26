@@ -40,7 +40,7 @@ private:
 	void CreateGridMesh(int x, int y);
 	float GetDelta();
 	void DrawTexture(float x, float y, float sx, float sy, GLuint texID);
-	void CreateFBOs();
+    void CreateFBOs(int x=512, int y=512);
 
 
 	bool m_Initialized = false;
@@ -83,6 +83,8 @@ private:
 
 	GLuint m_FBO[5]{};
 	GLuint m_RT[5]{};
+	GLuint m_RT_1[5]{};
+	GLuint m_Depth{};
 
 	GLuint m_RGBTexture{};
 
